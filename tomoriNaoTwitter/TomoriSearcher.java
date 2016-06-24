@@ -4,7 +4,7 @@ import twitter4j.*;
 
 import java.util.*;
 
-public class TomoriSearcher extends UserStreamAdapter {
+public class TomoriSearcher {
     private Twitter twitter;
 
     public TomoriSearcher() {
