@@ -6,3 +6,6 @@ twitter4jを使って何か作る
 
 ## TomoriUserStream.java
 UserStreamを使った遊び
+
+## pictureURL.txt
+TomoriUserStreamで使う画像のURLファイル
