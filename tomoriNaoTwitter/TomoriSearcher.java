@@ -1,22 +1,15 @@
-package tomoriNaoTwitter;
+package TomoriNaoTwitter;
 
 import twitter4j.*;
-import twitter4j.auth.AccessToken;
 
 import java.util.*;
 
-public class TomoriSearcher {
+public class TomoriSearcher extends UserStreamAdapter {
     private Twitter twitter;
-    private Map<User, User[]> tomoriMap = new HashMap<>();
 
     public TomoriSearcher() {
-        String consumerKey = "";
-        String consumerSecret = "";
-        String accessToken = "";
-        String accessSecret = "";
-        this.twitter = TwitterFactory.getSingleton();
-        this.twitter.setOAuthConsumer(consumerKey, consumerSecret);
-        this.twitter.setOAuthAccessToken(new AccessToken(accessToken, accessSecret));
+        //twitter4j.properties（外部ファイル）から各キーを読み込んで生成
+        this.twitter = new TwitterFactory().getInstance();
     }
 
     //フォローしている人から名前が友利奈緒の人を取得
@@ -42,8 +35,7 @@ public class TomoriSearcher {
         for (int i = 0; i < loopMax; i++) {
             //lookupUsersの仕様が100人までの情報しか取得できないため100人ずつ処理
             ResponseList<User> users = twitter.lookupUsers(Arrays.copyOfRange(userID, i * 100, (i + 1) * 100));
-            for (User user : users
-                    ) {
+            for (User user : users) {
                 if (user.getName().matches(".*友.*利.*奈.*緒.*")) {
                     targetUsers.add(user);
                 }
@@ -73,31 +65,38 @@ public class TomoriSearcher {
         System.out.println(str);
     }
 
+    public Twitter getTwitter() {
+        return twitter;
+    }
+
+
     public static void main(String[] args) throws TwitterException {
-        int mutualFollower = 0;
+        int mutualFollower = 0; //相互フォロワー数
         HashSet<String> icons = new HashSet<>();    //フォローとフォロワーからの重複を削除
-        TomoriSearcher tnd = new TomoriSearcher();
+        TomoriSearcher tns = new TomoriSearcher();
         String targetName = "sydosy1";
-//        icons.add(tnd.getIconURL(targetName));
+        icons.add(tns.getIconURL(targetName));
 
         //フォロワー
-        User[] followerUsers = tnd.getFollowerTomori(targetName);
+        User[] followerUsers = tns.getFollowerTomori(targetName);
         for (User user : followerUsers) {
             icons.add(user.getProfileImageURL());
         }
 
         //フォロー
-        User[] followUsers = tnd.getFollowTomori(targetName);
+        User[] followUsers = tns.getFollowTomori(targetName);
         for (User user : followUsers) {
+            //既にaddされていれば相互フォローを1増やす
             if (!icons.add(user.getProfileImageURL())) {
                 mutualFollower++;
             }
         }
 
 
-        tnd.tweet(targetName + "の\n" +
+        tns.tweet(targetName + "の\n" +
                 "フォローから友利奈緒を" + followUsers.length + "人見つけました！" +
                 "\nフォロワーから友利奈緒を" + followerUsers.length + "人見つけました！" +
                 "\n相互フォローの友利奈緒は" + mutualFollower + "人です！");
+
     }
 }
