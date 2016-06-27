@@ -7,11 +7,12 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class TomoriUserStream extends UserStreamAdapter {
     private Twitter twitter;
     private String[] tomoriPictureURL;
-    private int counter;
+    private Random random;
 
     public TomoriUserStream(){
         this.twitter = new TwitterFactory().getInstance();
@@ -30,7 +31,7 @@ public class TomoriUserStream extends UserStreamAdapter {
             e.printStackTrace();
         }
         this.tomoriPictureURL = tmpArray.toArray(new String[0]);
-        this.counter = 0;
+        this.random = new Random();
 
     }
 
@@ -38,15 +39,14 @@ public class TomoriUserStream extends UserStreamAdapter {
     @Override
     public void onStatus(Status status) {
         String tweet = status.getText();
-        System.out.println(status.getUser().getName() + " : " + tweet);
         //RTを除外
-        if(!tweet.matches("RT @.*")) {
+        if(!tweet.matches(".*RT @.*")) {
+            System.out.println(status.getUser().getName() + " : " + tweet);
             if (tweet.matches(".*にゃーん.*")) {
                 try {
-                    //画像を順番に投げる
+                    //画像をランダムに投げる
                     this.twitter.updateStatus(new StatusUpdate("@" + status.getUser().getScreenName()
-                            + " " + tomoriPictureURL[counter % tomoriPictureURL.length]).inReplyToStatusId(status.getId()));
-                    counter++;
+                            + " " + tomoriPictureURL[random.nextInt(tomoriPictureURL.length)]).inReplyToStatusId(status.getId()));
                 } catch (TwitterException e) {
                     e.printStackTrace();
                 }
@@ -75,6 +75,14 @@ public class TomoriUserStream extends UserStreamAdapter {
                 e.printStackTrace();
             }
         }
+    }
+
+    public Twitter getTwitter() {
+        return twitter;
+    }
+
+    public String[] getTomoriPictureURL() {
+        return tomoriPictureURL;
     }
 
     public static void main(String[] args) {
