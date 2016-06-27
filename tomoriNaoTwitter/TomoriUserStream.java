@@ -32,7 +32,6 @@ public class TomoriUserStream extends UserStreamAdapter {
         }
         this.tomoriPictureURL = tmpArray.toArray(new String[0]);
         this.random = new Random();
-
     }
 
     //ツイート取得時
@@ -40,9 +39,9 @@ public class TomoriUserStream extends UserStreamAdapter {
     public void onStatus(Status status) {
         String tweet = status.getText();
         //RTを除外
-        if(!tweet.matches(".*RT @.*")) {
+        if(status.getRetweetedStatus() == null) {
             System.out.println(status.getUser().getName() + " : " + tweet);
-            if (tweet.matches(".*にゃーん.*")) {
+            if(tweet.contains("にゃーん")){
                 try {
                     //画像をランダムに投げる
                     this.twitter.updateStatus(new StatusUpdate("@" + status.getUser().getScreenName()
@@ -50,7 +49,7 @@ public class TomoriUserStream extends UserStreamAdapter {
                 } catch (TwitterException e) {
                     e.printStackTrace();
                 }
-            } else if (tweet.matches(".*鯖プロ.*")) {
+            } else if (tweet.contains("鯖プロ")) {
                 try {
                     this.twitter.updateStatus(new StatusUpdate("@" + status.getUser().getScreenName() + " 進捗どうですか？").inReplyToStatusId(status.getId()));
                 } catch (TwitterException e) {
@@ -63,12 +62,13 @@ public class TomoriUserStream extends UserStreamAdapter {
     //フォローされた時
     @Override
     public void onFollow(User source, User followedUser) {
-        //フォローされた人
-        System.out.println("source: " + source.getName());
         //フォローした人
+        System.out.println("source: " + source.getName());
+        //フォローされた人
         System.out.println("followedUser: " + followedUser.getName());
 
-        if(!source.getScreenName().contains("TomoriNaoServer")) {
+        //BOTがフォローされたら
+        if(followedUser.getScreenName().contains("TomoriNaoServer")) {
             try {
                 this.twitter.createFriendship(source.getId());
             } catch (TwitterException e) {
