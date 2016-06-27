@@ -39,20 +39,23 @@ public class TomoriUserStream extends UserStreamAdapter {
     public void onStatus(Status status) {
         String tweet = status.getText();
         System.out.println(status.getUser().getName() + " : " + tweet);
-        if (tweet.matches(".*にゃーん.*")){
-            try {
-                //画像を順番に投げる
-                this.twitter.updateStatus(new StatusUpdate("@" + status.getUser().getScreenName()
-                        + " " + tomoriPictureURL[counter%tomoriPictureURL.length]).inReplyToStatusId(status.getId()));
-                counter++;
-            } catch (TwitterException e) {
-                e.printStackTrace();
-            }
-        }else if(tweet.matches(".*鯖プロ.*")){
-            try {
-                this.twitter.updateStatus(new StatusUpdate("@" + status.getUser().getScreenName() + " 進捗どうですか？").inReplyToStatusId(status.getId()));
-            } catch (TwitterException e) {
-                e.printStackTrace();
+        //RTを除外
+        if(!tweet.matches("RT @.*")) {
+            if (tweet.matches(".*にゃーん.*")) {
+                try {
+                    //画像を順番に投げる
+                    this.twitter.updateStatus(new StatusUpdate("@" + status.getUser().getScreenName()
+                            + " " + tomoriPictureURL[counter % tomoriPictureURL.length]).inReplyToStatusId(status.getId()));
+                    counter++;
+                } catch (TwitterException e) {
+                    e.printStackTrace();
+                }
+            } else if (tweet.matches(".*鯖プロ.*")) {
+                try {
+                    this.twitter.updateStatus(new StatusUpdate("@" + status.getUser().getScreenName() + " 進捗どうですか？").inReplyToStatusId(status.getId()));
+                } catch (TwitterException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
